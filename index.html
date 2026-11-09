@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>معجم و أطلس اللهجات العربية</title>
+
+    <!-- External Library Styles -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Local Stylesheets -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="main-header">
+      <div class="header-container">
+        <div class="brand">
+          <h1 class="logo-text">أطلس اللهجات</h1>
+        </div>
+
+        <nav class="nav-links">
+          <a href="#search-section">البحث</a>
+          <a href="#map-section">الخريطة</a>
+          <a href="#insights-section">التحليلات</a>
+          <a href="#dictionary-section">المعجم</a>
+        </nav>
+
+        <div class="header-actions">
+          <!-- Dark Mode Toggle Button -->
+          <button id="themeToggleBtn" class="btn-theme" title="تبديل المظهر">
+            الوضع الداكن
+          </button>
+          <a href="#about-modal" class="btn-subtle">عن المعجم</a>
+          <button class="btn-primary" id="openAddWordModalBtn">
+            + أضف مصطلحاً
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== MAIN PAGE CONTAINER ==================== -->
+    <main class="page-container">
+      <!-- SECTION 1: SEARCH WITH INLINE SCOPE FILTER -->
+      <section id="search-section" class="section search-section">
+        <div class="search-box-wrapper">
+          <select id="searchScopeSelect" class="search-scope-select">
+            <option value="all">الكل</option>
+            <option value="term">المصطلح فقط</option>
+            <option value="meaning">المعنى فقط</option>
+            <option value="location">المنطقة</option>
+          </select>
+          <input
+            type="text"
+            id="globalSearchInput"
+            placeholder="ابحث عن كلمة عامية، شرح، أو مدينة..."
+            autocomplete="off"
+          />
+          <button class="search-btn" id="searchSubmitBtn">بحث</button>
+        </div>
+        <div
+          id="didYouMeanBox"
+          class="did-you-mean"
+          style="display: none"
+        ></div>
+      </section>
+
+      <!-- SECTION 2: MAP WITH FLOATING COUNTRY PILLS -->
+      <section id="map-section" class="section map-section">
+        <div class="map-wrapper">
+          <!-- Floating Country Filter Pills (Positioned Inside Map) -->
+          <div class="country-pills-bar" id="countryPillsContainer">
+            <button class="pill active" data-country="all">الكل</button>
+            <button class="pill" data-country="الأردن">الأردن</button>
+            <button class="pill" data-country="مصر">مصر</button>
+            <button class="pill" data-country="لبنان">لبنان</button>
+            <button class="pill" data-country="السعودية">السعودية</button>
+            <button class="pill" data-country="العراق">العراق</button>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div id="map" class="map-container"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: INSIGHTS & ANALYTICS -->
+      <section id="insights-section" class="section insights-section">
+        <div class="insights-grid">
+          <!-- Box 1: Featured / Active Slangs -->
+          <div class="dashboard-box popular-box">
+            <div class="box-header">
+              <h3>مصطلحات متداولة اليوم</h3>
+              <div class="box-tabs">
+                <button class="tab-btn active">الأكثر بحثاً</button>
+                <button class="tab-btn">أحدث الإضافات</button>
+              </div>
+            </div>
+            <div class="box-content" id="popularTermsList">
+              <p class="placeholder-text">
+                نهفة (عمّان) • كشخة (الرياض) • إزيك (القاهرة) • فدوة (بغداد)
+              </p>
+            </div>
+          </div>
+
+          <!-- Box 2: Interactive Chart -->
+          <div class="dashboard-box chart-box">
+            <div class="box-header">
+              <h3 id="chartTitleText">توزيع الكلمات حسب النبرة</h3>
+              <div class="box-controls">
+                <button id="chartBackBtn" class="btn-sm" style="display: none">
+                  ← رجوع
+                </button>
+                <button id="chartToggleBtn" class="btn-sm">
+                  عرض حسب الدول
+                </button>
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="insightsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: DICTIONARY DIRECTORY -->
+      <section id="dictionary-section" class="section dictionary-section">
+        <div class="section-header">
+          <h2>دليل المصطلحات (من الألف إلى الياء)</h2>
+          <div class="sort-controls">
+            <label for="sortSelect">الترتيب:</label>
+            <select id="sortSelect">
+              <option value="az">أبجدي (أ - ي)</option>
+              <option value="za">أبجدي (ي - أ)</option>
+              <option value="random">عشوائي</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="activeFilterBadge" class="filter-badge" style="display: none">
+          <span>تصفية حسب: <strong id="filterName"></strong></span>
+          <button id="clearFilterBtn">إزالة التصفية [✕]</button>
+        </div>
+
+        <div id="termsGrid" class="cards-grid"></div>
+      </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
